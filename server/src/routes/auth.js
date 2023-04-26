@@ -5,6 +5,7 @@ const passport = require('passport')
 const User = require('../models/users')
 const { encryptPassword } = require('../services/auth')
 const { sendMail } = require('../config/nodemailer')
+const { ensureAuthenticated } = require('../middlewares/auth')
 
 router.post(
   '/login',
@@ -140,3 +141,18 @@ router.get('/github-auth-error', (req, res) => {
 })
 
 module.exports = router
+
+router.get('/logout', (req, res) => {
+  req.logout()
+  res.send('Redirect to loggin')
+})
+
+router.get('/logged-user', ensureAuthenticated, (req, res) => {
+  if (!req.user) {
+    res.status(400).json({
+      success: false,
+      message: 'No user logged in'
+    })
+  }
+  res.status(200).json(req.user)
+})
